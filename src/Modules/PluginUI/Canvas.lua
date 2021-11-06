@@ -1,7 +1,7 @@
 --[[
 gilaga4815
 
-updated : 11 / 3 / 2021
+updated : 11 / 5 / 2021
 
 STUDIO SKETCH
 
@@ -67,31 +67,34 @@ local barUpdate = Toolbar.init(Canvas.sideFrame)
 local function connectCanvas()
 	local moveConnection = nil 
 	
+	local xOffset = Canvas.canvasFrame.AbsolutePosition.X 
+	
 	Canvas.canvasFrame.InputBegan:Connect(function(inputData, processed) -- This will allow for the mouse change thing 
 		if processed then return end
 		
 		-- this is where the accessing of the draw callback will occur 
 		
 		if inputData.UserInputType == Enum.UserInputType.MouseButton1 then
-			print("Working")
+			local lastFramePosition = nil
 			
-			moveConnection  = Canvas.canvasFrame.MouseMoved:Connect(function(posX, posY) 
-				print("This is updating")
-				-- The code here is just driver code that will be replaced later 
-				
-				local cPoint = DrawModule.RenderPoint() 
-				
-				cPoint.Parent = Canvas.canvasFrame
-			
-				cPoint.Position = UDim2.fromOffset(posX - Canvas.canvasFrame.AbsolutePosition.X, posY) 
-				
-				cPoint.ZIndex = 2 
-				
-				print(cPoint.Position)
+			moveConnection = Canvas.canvasFrame.InputChanged:Connect(function(iData)
+				if iData.UserInputType == Enum.UserInputType.MouseMovement then
+					local newPos = Vector2.new(iData.Position.X - xOffset, iData.Position.Y) 
+					
+					if lastFramePosition then
+						local newPosition = Vector2.new(iData.Position.X - xOffset, iData.Position.Y)
+						local newLine = DrawModule.RenderLine(newPosition, lastFramePosition)
+
+						newLine.Parent = Canvas.canvasFrame
+						newLine.Position = UDim2.fromOffset(newPosition.X, newPosition.Y)
+					end
+					
+					lastFramePosition = Vector2.new(iData.Position.X - xOffset, iData.Position.Y) 
+				end				
 			end)
-		end
+		end	
 	end)
-	
+		
 	Canvas.canvasFrame.InputEnded:Connect(function(inputData, processed)
 		if processed then return end
 		
