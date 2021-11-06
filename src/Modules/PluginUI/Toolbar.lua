@@ -23,8 +23,10 @@ local Toolbar = {}
 Toolbar.buttons = {} 
 Toolbar.activeTool = nil
 
-local function connectButton(button)
-	if not button then return end
+local function connectButton(button, changeEvent)
+	if not button or not changeEvent then
+		return 
+	end
 	
 	button.MouseEnter:Connect(function()
 		if button.ImageColor3 == UIEnums.Colors.ButtonText.Disabled then
@@ -58,6 +60,8 @@ function Toolbar.init(toolbarFrame) -- Handles UI Rendering
 	baseButton.BackgroundTransparency = 1 
 	baseButton.ImageColor3 = UIEnums.Colors.ButtonText.Disabled -- Using Button Text Colors to make it easier
 	
+	local toolbarUpdate = Instance.new("BindableEvent") -- Event used to handle the updates within the toolbar and change the buttons around :) 
+	
 	for iName, iData in pairs(CanvasItems) do
 		local itemButton = baseButton:Clone()
 		
@@ -68,8 +72,10 @@ function Toolbar.init(toolbarFrame) -- Handles UI Rendering
 		table.insert(Toolbar.buttons, itemButton)	
 		itemButton.Parent = toolbarFrame
 		
-		connectButton(itemButton)
+		connectButton(itemButton, toolbarUpdate)
 	end
+	
+	return toolbarUpdate.Event 
 end
 
 return Toolbar 
