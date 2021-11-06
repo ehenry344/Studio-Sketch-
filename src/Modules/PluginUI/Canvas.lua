@@ -14,6 +14,8 @@ This module handles creation of the canvas frame, which is what the center of th
 local UIEnums = require(script.Parent.Parent.Utility.UI_Enums)
 local Toolbar = require(script.Toolbar)
 
+local DrawModule = require(script.Parent.Parent.DrawModule)
+
 local Canvas = {} 
 
 local function renderFrame() -- Created Function For the Sake Of Cleanliness 
@@ -58,26 +60,53 @@ renderFrame()
 
 -- Now Render The Toolbar 
 
-Toolbar.init(Canvas.sideFrame)
+local barUpdate = Toolbar.init(Canvas.sideFrame)
 
 -- Setup the connections to draw on the canvas and such
 
-local function connectCanvas(pMouse)
-	local canvas = Canvas.canvasFrame -- save the pain of typing for now lul :) 
+local function connectCanvas()
+	local moveConnection = nil 
+	
+	Canvas.canvasFrame.InputBegan:Connect(function(inputData, processed) -- This will allow for the mouse change thing 
+		if processed then return end
 		
-	canvas.MouseEnter:Connect(function()
+		-- this is where the accessing of the draw callback will occur 
 		
+		if inputData.UserInputType == Enum.UserInputType.MouseButton1 then
+			print("Working")
+			
+			moveConnection  = Canvas.canvasFrame.MouseMoved:Connect(function(posX, posY) 
+				print("This is updating")
+				-- The code here is just driver code that will be replaced later 
+				
+				local cPoint = DrawModule.RenderPoint() 
+				
+				cPoint.Parent = Canvas.canvasFrame
+			
+				cPoint.Position = UDim2.fromOffset(posX - Canvas.canvasFrame.AbsolutePosition.X, posY) 
+				
+				cPoint.ZIndex = 2 
+				
+				print(cPoint.Position)
+			end)
+		end
 	end)
 	
-	print(pMouse.X)
+	Canvas.canvasFrame.InputEnded:Connect(function(inputData, processed)
+		if processed then return end
+		
+		if inputData.UserInputType == Enum.UserInputType.MouseButton1 and moveConnection then
+			moveConnection:Disconnect() 
+		end
+	end)
 end
+
+connectCanvas() 
 
 -- Canvas Functions 
 
-function Canvas:SetParent(parent, mouse)
+function Canvas:SetParent(parent)
 	self.frameInstance.Parent = parent
-	
-	connectCanvas(mouse) -- connect the canvas with the mouse as well 
 end
 
 -- Handle Rest Of the Initialization Process For the Frame 
