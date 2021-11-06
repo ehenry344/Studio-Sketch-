@@ -1,7 +1,7 @@
 --[[
 gilaga4815
 
-updated : 10 / 27 / 2021
+updated : 11 / 5 / 2021
 
 STUDIO SKETCH
 
@@ -46,7 +46,7 @@ end
 
 -- Actually Start the Thing When This is invoked 
 
-return function(mainWidget, extraArgs)  -- Just Create a callable function to be created 
+return function(mainWidget)  -- Just Create a callable function to be created 
 	local ViewSelector = require(script.Parent.Utility.UIClasses.ViewSelector)
 	
 	startupModules(PluginUI)
@@ -58,7 +58,7 @@ return function(mainWidget, extraArgs)  -- Just Create a callable function to be
 	
 	for i = 2, #pluginModules do
 		local element = pluginModules[i]	
-		element:SetParent(MainFrame.holderFrame, extraArgs)
+		element:SetParent(MainFrame.holderFrame)
 		
 		newSelector:CreateSelector(element.frameInstance) 
 	end
