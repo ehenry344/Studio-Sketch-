@@ -2,7 +2,7 @@
 gilaga4815
 
 written : 9 / 25 / 2021
-updated : 11 / 3 / 2021 
+updated : 11 / 5 / 2021 
 
 Studio Sketch Loader / Main Script That Manages all of the important stuff to make it a plugin
 ]]
@@ -19,12 +19,9 @@ local sketchToggle = pluginToolbar:CreateButton("Toggle Canvas", "Toggle Canvas 
 local canvasWidgetData = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, false, 200, 200)
 local sketchWidget = plugin:CreateDockWidgetPluginGui("StudSketch_Canvas", canvasWidgetData) 
 
-plugin:Activate(false) 
-
 -- Plugin Code Here 
 
-initializer(sketchWidget, {"Canvas", plugin:GetMouse()})
-
+initializer(sketchWidget) 
 -- Widget Stuff Below 
 
 sketchWidget.Title = "Studio Sketch Canvas"
