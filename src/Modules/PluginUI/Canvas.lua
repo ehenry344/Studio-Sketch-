@@ -1,7 +1,7 @@
 --[[
 gilaga4815
 
-updated : 11 / 5 / 2021
+updated : 11 / 22 / 2021
 
 STUDIO SKETCH
 
@@ -10,13 +10,19 @@ Canvas Frame Singleton Module :
 This module handles creation of the canvas frame, which is what the center of the plugin pretty much is
 ]]
 
-
 local UIEnums = require(script.Parent.Parent.Utility.UI_Enums)
-local Toolbar = require(script.Toolbar)
+local UIUtil = require(script.Parent.Parent.Utility.UI_Utility)
 
-local DrawModule = require(script.Parent.Parent.DrawModule)
+local Toolbar = require(script.Toolbar)
+local ToolConnections = require(script.ToolConnections)
 
 local Canvas = {} 
+
+local function packTable(t1, t2) -- ByReference Table Packing 
+	for i = 1, #t2 do 
+		t1[#t1 + 1] = t2[i] 
+	end
+end
 
 local function renderFrame() -- Created Function For the Sake Of Cleanliness 
 	Canvas.frameInstance = Instance.new("Frame")
@@ -64,42 +70,27 @@ local barUpdate = Toolbar.init(Canvas.sideFrame)
 
 -- Setup the connections to draw on the canvas and such
 
-local function connectCanvas()
-	local moveConnection = nil 
-	
-	local xOffset = Canvas.canvasFrame.AbsolutePosition.X 
+local function connectCanvas()	
+	local useConnections = {} -- this will hold the connections that are currently in use for the canvas 
 	
 	Canvas.canvasFrame.InputBegan:Connect(function(inputData, processed) -- This will allow for the mouse change thing 
 		if processed then return end
 		
-		-- this is where the accessing of the draw callback will occur 
+		local newUpdater = ToolConnections[Toolbar.GetActiveTool()] 
 		
-		if inputData.UserInputType == Enum.UserInputType.MouseButton1 then
-			local lastFramePosition = nil
-			
-			moveConnection = Canvas.canvasFrame.InputChanged:Connect(function(iData)
-				if iData.UserInputType == Enum.UserInputType.MouseMovement then
-					local newPos = Vector2.new(iData.Position.X - xOffset, iData.Position.Y) 
-					
-					if lastFramePosition then
-						local newPosition = Vector2.new(iData.Position.X - xOffset, iData.Position.Y)
-						local newLine = DrawModule.RenderLine(newPosition, lastFramePosition)
-
-						newLine.Parent = Canvas.canvasFrame
-						newLine.Position = UDim2.fromOffset(newPosition.X, newPosition.Y)
-					end
-					
-					lastFramePosition = Vector2.new(iData.Position.X - xOffset, iData.Position.Y) 
-				end				
-			end)
+		if newUpdater and inputData.UserInputType == Enum.UserInputType.MouseButton1 then			
+			 packTable(useConnections, newUpdater(Canvas.canvasFrame))
 		end	
 	end)
 		
 	Canvas.canvasFrame.InputEnded:Connect(function(inputData, processed)
-		if processed then return end
+		if processed then return end		
 		
-		if inputData.UserInputType == Enum.UserInputType.MouseButton1 and moveConnection then
-			moveConnection:Disconnect() 
+		if inputData.UserInputType == Enum.UserInputType.MouseButton1 and useConnections then			
+			for i = 1, #useConnections do 	
+				useConnections[i]:Disconnect()
+				useConnections[i] = nil 
+			end
 		end
 	end)
 end
