@@ -1,7 +1,7 @@
 --[[
 gilaga4815
 
-updated : 11 / 5 / 2021
+updated : 11 / 22 / 2021
 
 STUDIO SKETCH
 
@@ -9,6 +9,11 @@ Drawing System Module :
 
 Utility for the drawing system that allows for independent rendering of ui elements without being proprietary to the drawing implements
 ]] 
+
+-- defined for efficiency 
+local atan = math.atan
+local pi = math.pi
+
 
 local DrawModule = {}
 
@@ -30,17 +35,15 @@ function DrawModule.RenderLine(pos1, pos2)
 	newLine.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	newLine.ZIndex = 2 
 	
-	-- Math to handle the line generation between the two points as well as the rotation :) 
+	-- Line Math
 	
-	local bLength = (pos2.Y - pos1.Y) -- Didn't declare a since b is the only one used twice :) 
-	local hypLength = math.sqrt((pos2.X - pos1.X)^2 + (bLength)^2) -- gets length of the hypotenuse between the two points 
+	local positionDiff = pos1 - pos2
+	local thetaRot = math.atan(positionDiff.Y / positionDiff.X) * (180 / math.pi)
 	
-	local rotationValue = math.deg(math.asin(bLength / hypLength)) 
-	
-	-- Math is handled and now we do the sizing 
-	
-	newLine.Size = UDim2.fromOffset(hypLength, 5) 
-	newLine.Rotation = rotationValue 
+	newLine.AnchorPoint = Vector2.new(0.5, 0.5)
+	newLine.Size = UDim2.new(0, positionDiff.Magnitude, 0, 5) -- Magnitude is the hypotenuse 
+	newLine.Position = UDim2.new(0, pos1.X - positionDiff.X / 2, 0, pos1.Y - positionDiff.Y / 2)
+	newLine.Rotation = thetaRot 
 	
 	return newLine 
 end
