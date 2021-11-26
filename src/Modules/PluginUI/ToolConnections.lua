@@ -16,9 +16,10 @@ local ToolConns = {
 	["Pencil"] = function(frame)
 		local connections = {} 
 		
-		local frameOffset = frame.AbsolutePosition.X 		
-		
+		local frameOffset = frame.AbsolutePosition.X 				
 		local lastFramePosition = nil -- holds the position of the last frame used 
+		
+		local recentlyAdded = {} -- holds the instances to check for overlapping lines 
 		
 		connections[#connections + 1] = frame.InputChanged:Connect(function(inputData)
 			if inputData.UserInputType == Enum.UserInputType.MouseMovement then
@@ -27,13 +28,15 @@ local ToolConns = {
 				if lastFramePosition then
 					local newLine = DrawModule.RenderLine(lastFramePosition, newPos)
 					newLine.Parent = frame 
+					
+					recentlyAdded[#recentlyAdded + 1] = newLine 
 				end
 				
 				lastFramePosition = newPos 
 			end
 		end)
 		
-		return connections 
+		return connections, recentlyAdded 
 	end,
 	["Eraser"] = function(frame)
 		local connections = {} 
@@ -93,6 +96,31 @@ local ToolConns = {
 					end		
 				end			
 				]] 
+			end
+		end)
+		
+		return connections 
+	end,
+	["Line"] = function(frame) 
+		local connections = {} 
+		
+		local frameOffset = frame.AbsolutePosition.X 
+		
+		local lStart = Vector2.new() 
+		local currentLine = nil 
+		
+		connections[#connections + 1] = frame.InputChanged:Connect(function(inputData)			
+			if not lStart then 
+				lStart.X = inputData.Position.X - frameOffset
+				lStart.Y = inputData.Position.Y 
+			end			
+			
+			if inputData.UserInputType == Enum.UserInputType.MouseMovement then
+				if currentLine then 
+					currentLine:Destroy() 
+				end
+				currentLine = DrawModule.RenderLine(lStart, Vector2.new(inputData.Position.X - frameOffset, inputData.Position.Y))  
+				currentLine.Parent = frame 
 			end
 		end)
 		
