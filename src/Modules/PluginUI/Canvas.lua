@@ -1,7 +1,7 @@
 --[[
 gilaga4815
 
-updated : 11 / 22 / 2021
+updated : 11 / 25 / 2021
 
 STUDIO SKETCH
 
@@ -71,15 +71,20 @@ local barUpdate = Toolbar.init(Canvas.sideFrame)
 -- Setup the connections to draw on the canvas and such
 
 local function connectCanvas()	
-	local useConnections = {} -- this will hold the connections that are currently in use for the canvas 
+	local useConnections = {} -- temporary connection cache 
+	local recentFrames = nil 
 	
-	Canvas.canvasFrame.InputBegan:Connect(function(inputData, processed) -- This will allow for the mouse change thing 
+	Canvas.canvasFrame.InputBegan:Connect(function(inputData, processed) 
 		if processed then return end
 		
 		local newUpdater = ToolConnections[Toolbar.GetActiveTool()] 
 		
 		if newUpdater and inputData.UserInputType == Enum.UserInputType.MouseButton1 then			
-			 packTable(useConnections, newUpdater(Canvas.canvasFrame))
+			local connData, recent = newUpdater(Canvas.canvasFrame) 
+			
+			recentFrames = recent
+			packTable(useConnections, connData) 
+			--packTable(useConnections, newUpdater(Canvas.canvasFrame))
 		end	
 	end)
 		
@@ -91,6 +96,12 @@ local function connectCanvas()
 				useConnections[i]:Disconnect()
 				useConnections[i] = nil 
 			end
+			
+			if not type(recentFrames) == "table" then -- just did this part as an alternative 
+				return
+			end
+			
+			
 		end
 	end)
 end
