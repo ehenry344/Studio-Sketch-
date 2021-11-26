@@ -106,13 +106,12 @@ local ToolConns = {
 		
 		local frameOffset = frame.AbsolutePosition.X 
 		
-		local lStart = Vector2.new() 
+		local lStart = nil 
 		local currentLine = nil 
 		
 		connections[#connections + 1] = frame.InputChanged:Connect(function(inputData)			
 			if not lStart then 
-				lStart.X = inputData.Position.X - frameOffset
-				lStart.Y = inputData.Position.Y 
+				lStart = Vector2.new(inputData.Position.X - frameOffset, inputData.Position.Y)
 			end			
 			
 			if inputData.UserInputType == Enum.UserInputType.MouseMovement then
